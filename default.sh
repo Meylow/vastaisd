@@ -61,6 +61,22 @@ function provisioning_start() {
     provisioning_get_files \
         "${A1111_DIR}/models/Stable-diffusion" \
         "${CHECKPOINT_MODELS[@]}"
+    provisioning_get_files \
+        "${A1111_DIR}/models/Lora" \
+        "${LORA_MODELS[@]}"
+
+    provisioning_get_files \
+        "${A1111_DIR}/models/VAE" \
+        "${VAE_MODELS[@]}"
+
+    provisioning_get_files \
+        "${A1111_DIR}/models/ESRGAN" \
+        "${ESRGAN_MODELS[@]}"
+
+    provisioning_get_files \
+        "${A1111_DIR}/extensions/sd-webui-controlnet/models" \
+        "${CONTROLNET_MODELS[@]}"
+
 
     
     # Avoid git errors because we run as root but files are owned by 'user'
