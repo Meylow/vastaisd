@@ -1,127 +1,34 @@
 #!/bin/bash
 
+# Aktiviert das virtuelle Python-Umfeld
 source /venv/main/bin/activate
+
+# Verzeichnis definieren
 A1111_DIR=${WORKSPACE}/stable-diffusion-webui
 
-# Optional: Extensions
-EXTENSIONS=(
- 
-)
-
-# Optional APT/PIP
-APT_PACKAGES=()
-PIP_PACKAGES=()
-
-# Model-Download-Listen
-CHECKPOINT_MODELS=(
-
-)
-
-LORA_MODELS=(
- 
-)
-
-VAE_MODELS=(
-    
-)
-
-ESRGAN_MODELS=(
- 
-)
-
-CONTROLNET_MODELS=(
-   
-)
-
-### DO NOT EDIT BELOW HERE UNLESS YOU KNOW WHAT YOU ARE DOING ###
-
-function provisioning_start() {
-    provisioning_print_header
-    provisioning_get_apt_packages
-    provisioning_get_extensions
-    provisioning_get_pip_packages
-
-    provisioning_get_files "${A1111_DIR}/models/Stable-diffusion" "${CHECKPOINT_MODELS[@]}"
-    provisioning_get_files "${A1111_DIR}/models/Lora" "${LORA_MODELS[@]}"
-    provisioning_get_files "${A1111_DIR}/models/VAE" "${VAE_MODELS[@]}"
-    provisioning_get_files "${A1111_DIR}/models/ESRGAN" "${ESRGAN_MODELS[@]}"
-    provisioning_get_files "${A1111_DIR}/extensions/sd-webui-controlnet/models" "${CONTROLNET_MODELS[@]}"
-
-    export GIT_CONFIG_GLOBAL=/tmp/temporary-git-config
-    git config --file $GIT_CONFIG_GLOBAL --add safe.directory '*'
-
-    cd "${A1111_DIR}"
-    LD_PRELOAD=libtcmalloc_minimal.so.4 \
-        python launch.py \
-            --skip-python-version-check \
-            --no-download-sd-model \
-            --do-not-download-clip \
-            --no-half \
-            --port 11404
-
-    provisioning_print_end
-}
-
-function provisioning_get_apt_packages() {
-    if [[ -n $APT_PACKAGES ]]; then
-        sudo apt-get update
-        sudo apt-get install -y ${APT_PACKAGES[@]}
-    fi
-}
-
-function provisioning_get_pip_packages() {
-    if [[ -n $PIP_PACKAGES ]]; then
-        pip install --no-cache-dir ${PIP_PACKAGES[@]}
-    fi
-}
-
-function provisioning_get_extensions() {
-    for repo in "${EXTENSIONS[@]}"; do
-        dir="${repo##*/}"
-        path="${A1111_DIR}/extensions/${dir}"
-        if [[ ! -d $path ]]; then
-            printf "Downloading extension: %s...\n" "${repo}"
-            git clone "${repo}" "${path}" --recursive
-        fi
-    done
-}
-
-function provisioning_get_files() {
-    if [[ -z $2 ]]; then return 1; fi
-    
-    dir="$1"
-    mkdir -p "$dir"
-    shift
-    arr=("$@")
-    printf "Downloading %s model(s) to %s...\n" "${#arr[@]}" "$dir"
-    for url in "${arr[@]}"; do
-        printf "Downloading: %s\n" "${url}"
-        provisioning_download "${url}" "${dir}"
-        printf "\n"
-    done
-}
-
-function provisioning_print_header() {
-    printf "\n##############################################\n#                                            #\n#          Provisioning container            #\n#                                            #\n#         This will take some time           #\n#                                            #\n# Your container will be ready on completion #\n#                                            #\n##############################################\n\n"
-}
-
-function provisioning_print_end() {
-    printf "\nProvisioning complete: Application should be running now.\n\n"
-}
-
-function provisioning_download() {
-    if [[ -n $HF_TOKEN && $1 =~ ^https://([a-zA-Z0-9_-]+\.)?huggingface\.co(/|$|\?) ]]; then
-        auth_token="$HF_TOKEN"
-    elif [[ -n $CIVITAI_TOKEN && $1 =~ ^https://([a-zA-Z0-9_-]+\.)?civitai\.com(/|$|\?) ]]; then
-        auth_token="$CIVITAI_TOKEN"
-    fi
-    if [[ -n $auth_token ]]; then
-        wget --header="Authorization: Bearer $auth_token" -qnc --content-disposition --show-progress -e dotbytes=4M -P "$2" "$1"
-    else
-        wget -qnc --content-disposition --show-progress -e dotbytes=4M -P "$2" "$1"
-    fi
-}
-
-if [[ ! -f /.noprovisioning ]]; then
-    provisioning_start
+# Sicherstellen, dass das WebUI-Verzeichnis existiert
+if [[ ! -d "$A1111_DIR" ]]; then
+    echo "Fehler: $A1111_DIR nicht gefunden!"
+    echo "Bitte stelle sicher, dass dein Google Drive Sync korrekt ist."
+    exit 1
 fi
+
+# Optional: Extensions aktualisieren (z. B. falls du ControlNet oder andere manuell ergänzt hast)
+# git -C "$A1111_DIR/extensions/sd-webui-controlnet" pull || true
+
+# Optional: Fix für GIT-Sicherheitswarnungen beim Root-Zugriff
+export GIT_CONFIG_GLOBAL=/tmp/temporary-git-config
+git config --file $GIT_CONFIG_GLOBAL --add safe.directory '*'
+
+# Startparameter definieren (du kannst hier Flags anpassen)
+export COMMANDLINE_ARGS="--skip-python-version-check --no-download-sd-model --do-not-download-clip --no-half --port 11404"
+
+# Starte AUTOMATIC1111 WebUI
+cd "$A1111_DIR"
+LD_PRELOAD=libtcmalloc_minimal.so.4 python launch.py $COMMANDLINE_ARGS &
+
+# Provisioning-Flag auf "fertig" setzen, damit A1111 nicht blockiert
+rm -f /.provisioning
+touch /workspace/.provisioning_done
+
+echo -e "\n✅ Stable Diffusion WebUI wurde gestartet auf Port 11404"
