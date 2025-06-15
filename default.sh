@@ -27,27 +27,18 @@ UNET_MODELS=(
 )
 
 LORA_MODELS=(
-    "https://huggingface.co/h94/IP-Adapter-FaceID/blob/main/ip-adapter-faceid-plusv2_sd15_lora.safetensors"
-    "https://huggingface.co/h94/IP-Adapter-FaceID/blob/main/ip-adapter-faceid-plusv2_sdxl_lora.safetensors"
+  
 )
 
 VAE_MODELS=(
-    "https://huggingface.co/stabilityai/sdxl-vae/blob/main/sdxl_vae.safetensors"
+  
 )
 
 ESRGAN_MODELS=(
-    "https://huggingface.co/uwg/upscaler/blob/main/ESRGAN/4x_foolhardy_Remacri.pth"
-    "https://huggingface.co/uwg/upscaler/blob/main/ESRGAN/4x_NickelbackFS_72000_G.pth"
-    "https://huggingface.co/uwg/upscaler/blob/main/ESRGAN/4x_NMKD-Siax_200k.pth"
-    "https://huggingface.co/uwg/upscaler/blob/main/ESRGAN/4x_NMKD-Superscale-SP_178000_G.pth"
-    "https://huggingface.co/uwg/upscaler/blob/main/ESRGAN/4x-UltraSharp.pth"
-    "https://huggingface.co/uwg/upscaler/blob/main/ESRGAN/8x_NMKD-Superscale_150000_G.pth"
+    
 )
 
 CONTROLNET_MODELS=(
-    "https://huggingface.co/h94/IP-Adapter-FaceID/blob/main/ip-adapter-faceid-plusv2_sd15.bin2"
-    "https://huggingface.co/h94/IP-Adapter-FaceID/blob/main/ip-adapter-faceid-plusv2_sdxl.bin"
-    "https://huggingface.co/lllyasviel/ControlNet-v1-1/tree/main"
     
 )
 
